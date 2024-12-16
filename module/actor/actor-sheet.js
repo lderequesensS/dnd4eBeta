@@ -15,12 +15,12 @@ import TraitSelector from "../apps/trait-selector.js";
 import TraitSelectorSense from "../apps/trait-selector-sense.js";
 import TraitSelectorSave from "../apps/trait-selector-save.js";
 import ListStringInput from "../apps/list-string-input.js";
-// import {onManageActiveEffect, prepareActiveEffectCategories} from "../effects.js";
 import ActiveEffect4e from "../effects/effects.js";
 import HPOptions from "../apps/hp-options.js";
 import { Helper } from "../helper.js";
 import {ActionPointExtraDialog} from "../apps/action-point-extra.js";
 import Item4e from "../item/item-document.js";
+import { localize } from "../globals.js";
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -34,7 +34,7 @@ export default class ActorSheet4e extends ActorSheet {
 		/**
 		 * Track the set of item filters which are applied
 		 * @type {Set}
-		 */
+		*/
 		this._filters = {
 			inventory: new Set(),
 			powers: new Set(),
@@ -43,17 +43,17 @@ export default class ActorSheet4e extends ActorSheet {
 	}
 
 
-	  /** @inheritdoc */
-	  async _updateObject(event, formData) {
+	/** @inheritdoc */
+	async _updateObject(event, formData) {
 		return super._updateObject(event, formData);
-	  }
-  
+	}
+
 	/** @override */
 	static get defaultOptions() {
 
 		//add offset height options for extra skills
 		let extraHeight = 0;
-		if(game.settings.get("dnd4e", "custom-skills")?.length){
+		if (game.settings.get("dnd4e", "custom-skills")?.length) {
 			extraHeight = game.settings.get("dnd4e", "custom-skills").length * 27;
 		}
 
@@ -78,23 +78,23 @@ export default class ActorSheet4e extends ActorSheet {
 				".section--tabs-content"
 			]
 		});
-  }
+	}
 
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
-  /**
-   * A set of item types that should be prevented from being dropped on this type of actor sheet.
-   * @type {Set<string>}
-   */
-   static unsupportedItemTypes = new Set();
-  /* -------------------------------------------- */
+	/**
+	* A set of item types that should be prevented from being dropped on this type of actor sheet.
+	* @type {Set<string>}
+	*/
+	static unsupportedItemTypes = new Set();
+	/* -------------------------------------------- */
 
-  /** @override */
-  get template() {
-	return `systems/dnd4e/templates/actor-sheet.html`;
-  }
+	/** @override */
+	get template() {
+		return `systems/dnd4e/templates/actor-sheet.html`;
+	}
 
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
 	/** @override */
 	async getData(options) {
@@ -129,7 +129,7 @@ export default class ActorSheet4e extends ActorSheet {
 			const item = this.actor.items.get(i._id);
 			i.labels = item.labels;
 		}
-		
+
 		// sheetData.config = CONFIG.DND4E;
 		actorData.size = DND4E.actorSizes;
 
@@ -139,31 +139,31 @@ export default class ActorSheet4e extends ActorSheet {
 
 			// Sort the skill names based on the label property
 			skillNames.sort((a, b) => actorData.skills[a].label?.localeCompare(actorData.skills[b].label));
-			
+
 			const sortedSkills = skillNames.reduce((acc, skillName) => {
-			  acc[skillName] = actorData.skills[skillName];
-			  return acc;
+				acc[skillName] = actorData.skills[skillName];
+				return acc;
 			}, {});
-			
+
 			actorData.skills = sortedSkills;
 		}
 
 		for ( let [s, skl] of Object.entries(actorData.skills)) {
 			// skl.ability = actorData.abilities[skl.ability].label.substring(0, 3).toLowerCase(); //what was this even used for again? I think it was some cobweb from 5e, can probably be safly deleted
 			skl.icon = this._getTrainingIcon(skl.training);
-			skl.hover = game.i18n.localize(DND4E.trainingLevels[skl.training]);
-			skl.label = skl.label ? skl.label: game.i18n.localize(DND4E.skills[s]);
+			skl.hover = localize(DND4E.trainingLevels[skl.training]);
+			skl.label = skl.label ? skl.label: localize(DND4E.skills[s]);
 		}
-		
+
 		this._prepareDataTraits(actorData.languages, 
 			{"spoken": CONFIG.DND4E.spoken, "script": CONFIG.DND4E.script}
 		);
 
-		this._prepareDataProfs(actorData.details.armourProf, 
+		this._prepareDataProfs(actorData.details.armourProf,
 			{"profArmor": CONFIG.DND4E.profArmor}
 		);
 
-		this._prepareDataProfs(actorData.details.weaponProf, 
+		this._prepareDataProfs(actorData.details.weaponProf,
 			{ weapons:Object.assign(
 				CONFIG.DND4E.weaponProficiencies,
 				CONFIG.DND4E.simpleM,
@@ -177,18 +177,18 @@ export default class ActorSheet4e extends ActorSheet {
 				CONFIG.DND4E.implement
 			)}
 		);
-		
+
 		this._prepareDataSense(actorData.senses,
 			{"vision": CONFIG.DND4E.vision, "special": CONFIG.DND4E.special}
 		);
-		
+
 		this._prepareDataSave(actorData.details,
 			{"saves": CONFIG.DND4E.saves}
 		);
 
 		// Prepare owned items
 		this._prepareItems(data);
-		
+
 
 		data.currencyGoldSum = this._currencyGoldSumLabel();
 
@@ -200,7 +200,7 @@ export default class ActorSheet4e extends ActorSheet {
 		actorData.resources = ["primary", "secondary", "tertiary"].reduce((obj, r) => {
 			const res = actorData.resources[r] || {};
 			res.name = r;
-			res.placeholder = game.i18n.localize("DND4E.Resource"+r.titleCase());
+			res.placeholder = localize("Resource"+r.titleCase());
 			if (res && res.value === 0) delete res.value;
 			if (res && res.max === 0) delete res.max;
 			obj[r] = res
@@ -215,7 +215,7 @@ export default class ActorSheet4e extends ActorSheet {
 
 		return data;
 	}
-	
+
 	_prepareDataTraits(data, map) {
 		for ( let [l, choices] of Object.entries(map) ) {
 			const trait = data[l];
@@ -263,7 +263,7 @@ export default class ActorSheet4e extends ActorSheet {
 		const inventory = this.#configItemToDisplayConfig(DND4E.inventoryTypes);
 		const features = this.#configItemToDisplayConfig(DND4E.featureTypes);
 		const powers = this._generatePowerGroups();
-		
+
 		// Partition items by category
 		let [items, pow, feats] = data.items.reduce((arr, item) => {
 			// Item details
@@ -287,7 +287,7 @@ export default class ActorSheet4e extends ActorSheet {
 			else if ( item.type === "power") arr[1].push(item);
 			else if ( Object.keys(features).includes(item.type ) ) arr[2].push(item);
 			return arr;
-		}, [[], [], [], []]);
+			}, [[], [], [], []]);
 
 		// Apply active item filters
 		items = this._filterItems(items, this._filters.inventory);
@@ -326,11 +326,11 @@ export default class ActorSheet4e extends ActorSheet {
 		this._sortFeatures(features);
 
 		data.moveTitle = `<p style="text-align:left">
-${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.MovementUnit")} ${game.i18n.localize("DND4E.MovementSpeedWalking")}
-<br>${parseInt(data.system.movement.run.value)} ${game.i18n.localize("DND4E.MovementUnit")} ${game.i18n.localize("DND4E.MovementSpeedRunning")}
-<br>${parseInt(data.system.movement.charge.value)} ${game.i18n.localize("DND4E.MovementUnit")} ${game.i18n.localize("DND4E.MovementSpeedCharging")}
-<br>${parseInt(data.system.movement.climb.value)} ${game.i18n.localize("DND4E.MovementUnit")} ${game.i18n.localize("DND4E.MovementSpeedClimbing")}
-<br>${parseInt(data.system.movement.shift.value)} ${game.i18n.localize("DND4E.MovementUnit")} ${game.i18n.localize("DND4E.MovementSpeedShifting")}`;
+${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${localize("MovementSpeedWalking")}
+<br>${parseInt(data.system.movement.run.value)} ${localize("MovementUnit")} ${localize("MovementSpeedRunning")}
+<br>${parseInt(data.system.movement.charge.value)} ${localize("MovementUnit")} ${localize("MovementSpeedCharging")}
+<br>${parseInt(data.system.movement.climb.value)} ${localize("MovementUnit")} ${localize("MovementSpeedClimbing")}
+<br>${parseInt(data.system.movement.shift.value)} ${localize("MovementUnit")} ${localize("MovementSpeedShifting")}`;
 
 		if(data.system.movement.custom){
 			const moveCustom = [];
@@ -345,7 +345,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 			if (a.hasOwnProperty(key) && b.hasOwnProperty(key)) {	
 				const varA = (typeof a[key] === 'string') ? a[key].toUpperCase() : a[key];
 				const varB = (typeof b[key] === 'string') ? b[key].toUpperCase() : b[key];
-	
+
 				let comparison = 0;
 				if (varA > varB) {
 					comparison = 1;
@@ -361,7 +361,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 
 				const varA = (typeof a.system[key] === 'string') ? a.system[key].toUpperCase() : a.system[key];
 				const varB = (typeof b.system[key] === 'string') ? b.system[key].toUpperCase() : b.system[key];
-	
+
 				let comparison = 0;
 				if (varA > varB) {
 					comparison = 1;
@@ -369,7 +369,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 				else if (varA < varB) {
 					comparison = -1;
 				}
-				else if( varA === varB){
+				else if ( varA === varB) {
 					// comparison = a.name.toUpperCase().localeCompare(b.name.toUpperCase());
 					if(a.sort > b.sort) comparison = 1;
 					else if(a.sort < b.sort) comparison = -1;
@@ -381,13 +381,13 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		};
 	};
 
-  /**
-   * Handle a drop event for an existing embedded Item to sort that Item relative to its siblings
-   * Overriders core to fix some minnor issues
-   * @param {Event} event
-   * @param {Object} itemData
-   * @Override
-   */
+	/**
+	* Handle a drop event for an existing embedded Item to sort that Item relative to its siblings
+	* Overriders core to fix some minnor issues
+	* @param {Event} event
+	* @param {Object} itemData
+	* @Override
+	*/
 	_onSortItem(event, itemData) {
 
 		// Get the drag source and its siblings
@@ -496,145 +496,156 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	_checkPowerAvailable(itemData) {
 		if( (!itemData.system.uses.value && itemData.system.preparedMaxUses)
 			|| !itemData.system.prepared) {
-				itemData.system.notAvailable = true;
+			itemData.system.notAvailable = true;
 
 		}
 	}
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 	/**
-   * A helper method to generate the text for the range of difrent powers
-   * @param {itemData} itemData
-   * @private
-   */
-	 _preparePowerRangeText(itemData) {
+	* A helper method to generate the text for the range of difrent powers
+	* @param {itemData} itemData
+	* @private
+	*/
+	_preparePowerRangeText(itemData) {
 
-		let area;
-		if(itemData.system.area) {
-			try{
+		let area = 0;
+		if (itemData.system.area) {
+			try {
 				let areaForm = game.helper.commonReplace(`${itemData.system.area}`, this.actor);
 				area = Roll.safeEval(areaForm);
 			} catch (e) {
 				area = itemData.system.area;
 			}
-		} else {
-			area = 0;
 		}
 
-		if(itemData.system.rangeType === "range") {
-			itemData.system.rangeText = `Ranged ${itemData.system.rangePower}`
-			itemData.system.rangeTextShort = `R`
-			itemData.system.rangeTextBlock = `${itemData.system.rangePower}`
-		} else if(itemData.system.rangeType === "closeBurst") {
-			itemData.system.rangeText = `Close Burst ${area}`
-			itemData.system.rangeTextShort = "C-BU"
-			itemData.system.rangeTextBlock = `${area}`
-		} else if(itemData.system.rangeType === "rangeBurst") {
-			itemData.system.rangeText = `Area Burst ${area} within ${itemData.system.rangePower}`
-			itemData.system.rangeTextShort = "A-BU"
-			itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower}`
-		} else if(itemData.system.rangeType === "closeBlast") {
-			itemData.system.rangeText = `Close Blast ${area}`
-			itemData.system.rangeTextShort = "C-BL"
-			itemData.system.rangeTextBlock = `${area}`
-		} else if(itemData.system.rangeType === "rangeBlast") {
-			itemData.system.rangeText = `Area Blast ${area} within ${itemData.system.rangePower}`
-			itemData.system.rangeTextShort = "A-BL"
-			itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower}`
-		} else if(itemData.system.rangeType === "wall") {
-			itemData.system.rangeText = `Area Wall ${area} within ${itemData.system.rangePower}`
-			itemData.system.rangeTextShort = "W"
-			itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower}`
-		} else if(itemData.system.rangeType === "personal") {
-			itemData.system.rangeText = "Personal"
-			itemData.system.rangeTextShort = "P"
-		} else if(itemData.system.rangeType === "special") {
-			itemData.system.rangeText = "Special"
-			itemData.system.rangeTextShort = "S"
-		} else if(itemData.system.rangeType === "touch") {
-			itemData.system.rangeTextShort = "M-T";
-			if(itemData.system.rangePower == null){
-				itemData.system.rangeTextBlock = '';
-				itemData.system.rangeText = `Melee Touch`;
-			} else {
-				itemData.system.rangeText = `Melee Touch ${itemData.system.rangePower}`;
-				itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
-			}
-		} else if(itemData.system.rangeType === "melee"){
-			if(itemData.system.rangePower === undefined || itemData.system.rangePower === null){
-				itemData.system.rangeText = `Melee`;
-				itemData.system.rangeTextShort = `M`;
-			} else {
-				itemData.system.rangeText = `Melee ${itemData.system.rangePower}`;
-				itemData.system.rangeTextShort = `M`;
+		switch (itemData.system.rangeType) {
+			case "range":
+				itemData.system.rangeText = `${localize("rangeRanged")} ${itemData.system.rangePower}`
+				itemData.system.rangeTextShort = localize("rangeRangedShort");
 				itemData.system.rangeTextBlock = `${itemData.system.rangePower}`
-			}
-		} else if(itemData.system.rangeType === "reach"){
-			itemData.system.rangeText = `Reach ${itemData.system.rangePower}`;
-			itemData.system.rangeTextShort = `R`;
-			itemData.system.rangeTextBlock = `${itemData.system.rangePower}`
-		} else if(itemData.system.rangeType === "weapon") {
+			break;
 
-			try {
-				const weaponUse = Helper.getWeaponUse(itemData.system, this.actor);
-				if(weaponUse.system.isRanged) {
-					itemData.system.rangeText = `Range Weapon - ${weaponUse.name}`
-					itemData.system.rangeTextShort = `W-R`
-					itemData.system.rangeTextBlock = `${weaponUse.system.range.value}/${weaponUse.system.range.long}`
+			case "closeBurst":
+				itemData.system.rangeText = `${localize("rangeCloseBurst")} ${area}`
+				itemData.system.rangeTextShort = localize("rangeCloseBurstShort");
+				itemData.system.rangeTextBlock = `${area}`
+			break;
+
+			case "rangeBurst":
+				itemData.system.rangeText = `${localize("rangeBurst")} ${area} ${localize("RangeWithin")} ${itemData.system.rangePower}`
+				itemData.system.rangeTextShort = localize("rangeBurstShort");
+				itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower}`
+			break;
+
+			case "rangeBlast":
+				itemData.system.rangeText = `${localize("rangeBlast")} ${area} ${localize("RangeWithin")} ${itemData.system.rangePower}`
+				itemData.system.rangeTextShort = localize("rangeBlastShort");
+				itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower}`
+			break;
+
+			case "wall":
+				itemData.system.rangeText = `${localize("rangeWall")} ${area} ${localize("RangeWithin")} ${itemData.system.rangePower}`
+				itemData.system.rangeTextShort = localize("rangeWallShort");
+				itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower}`
+			break;
+
+			case "personal":
+				itemData.system.rangeText = localize("rangePersonal");
+				itemData.system.rangeTextShort = localize("rangePersonalShort");
+			break;
+
+			case "personal":
+				itemData.system.rangeText = localize("rangeSpecial");
+				itemData.system.rangeTextShort = localize("rangeSpecialShort");
+			break;
+
+			case "touch":
+				itemData.system.rangeTextShort = localize("rangeTouch");
+				if(itemData.system.rangePower == null){
+					itemData.system.rangeText = localize("rangeTouch");
+					itemData.system.rangeTextBlock = '';
 				} else {
-					itemData.system.rangeText = `Melee Weapon - ${weaponUse.name}`;
-					itemData.system.rangeTextShort = "W-M";
-					
-					if(itemData.system.rangePower == null){
-						itemData.system.rangeTextBlock = '';
+					itemData.system.rangeText = `${localize("rangeTouch")} ${itemData.system.rangePower}`;
+					itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
+				}
+			break;
+
+			case "melee":
+				if(itemData.system.rangePower == null) {
+					itemData.system.rangeText = localize("rangeMelee");
+				} else {
+					itemData.system.rangeText = `${localize("rangeMelee")} ${itemData.system.rangePower}`;
+					itemData.system.rangeTextBlock = `${itemData.system.rangePower}`
+				}
+				itemData.system.rangeTextShort = localize("rangeMeleeShort");
+			break;
+
+			case "reach":
+				itemData.system.rangeText = `${localize("rangeReach")} ${itemData.system.rangePower}`;
+				itemData.system.rangeTextShort = localize("rangeReachShort");
+				itemData.system.rangeTextBlock = `${itemData.system.rangePower}`
+			break;
+
+			case "weapon":
+				try {
+					const weaponUse = Helper.getWeaponUse(itemData.system, this.actor);
+					if (weaponUse.system.isRanged) {
+						itemData.system.rangeText = `${localize("WeaponRanged")} - ${weaponUse.name}`;
+						itemData.system.rangeTextShort = localize("WeaponRangedShort");
+						itemData.system.rangeTextBlock = `${weaponUse.system.range.value}/${weaponUse.system.range.long}`
 					} else {
+						itemData.system.rangeText = `${localize("WeaponMelee")} - ${weaponUse.name}`;
+						itemData.system.rangeTextShort = localize("WeaponMeleeShort");
+						itemData.system.rangeTextBlock = '';
+
+						if(itemData.system.rangePower != null){
+							itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
+						}
+					}
+				} catch {
+					itemData.system.rangeText = localize("ItemTypeWeapon");
+					itemData.system.rangeTextShort = localize("WeaponMeleeShort");
+					itemData.system.rangeTextBlock = '';
+
+					if (itemData.system.rangePower != null) {
 						itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
 					}
 				}
+			break;
 
-			} catch {
-				itemData.system.rangeText = "Weapon";
-				itemData.system.rangeTextShort = "W-M";
-				itemData.system.rangeTextBlock = `${itemData.system.rangePower}`
-
-				if(itemData.system.rangePower == null){
-					itemData.system.rangeTextBlock = '';
-				} else {
-					itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
-				}
-			}
-
-		} else {
-			itemData.system.rangeText = game.i18n.localize("DND4E.NotAvalible");
-			itemData.system.rangeTextShort = game.i18n.localize("DND4E.NotAvalibleShort");
+			default:
+				itemData.system.rangeText = localize("NotAvalible");
+				itemData.system.rangeTextShort = localize("NotAvalibleShort");
+			break;
 		}
 	}
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
-  /**
-   * A helper method to establish the displayed preparation state for an item
-   * @param {Item} item
-   * @private
-   */
-  _prepareItemToggleState(item) {
-	const power = ["power","atwill","encounter","daily","utility"];
-	if (power.includes(item.type)) {
-	  // const isAlways = foundry.utils.getProperty(item.data, "preparation.mode") === "always";
-	  const isPrepared =  foundry.utils.getProperty(item.system, "prepared");
-	  item.toggleClass = isPrepared ? "active" : "";
-	  // if ( isAlways ) item.toggleClass = "fixed";
-	  // if ( isAlways ) item.toggleTitle = CONFIG.DND4E.spellPreparationModes.always;
-	  // else if ( isPrepared ) item.toggleTitle = CONFIG.DND4E.spellPreparationModes.prepared;
-	  if ( isPrepared ) item.toggleTitle = game.i18n.localize("DND4E.PowerPrepared");
-	  else item.toggleTitle = game.i18n.localize("DND4E.PowerUnPrepared");
+	/**
+	* A helper method to establish the displayed preparation state for an item
+	* @param {Item} item
+	* @private
+	*/
+	_prepareItemToggleState(item) {
+		const power = ["power","atwill","encounter","daily","utility"];
+		if (power.includes(item.type)) {
+			// const isAlways = foundry.utils.getProperty(item.data, "preparation.mode") === "always";
+			const isPrepared = foundry.utils.getProperty(item.system, "prepared");
+			item.toggleClass = isPrepared ? "active" : "";
+			// if ( isAlways ) item.toggleClass = "fixed";
+			// if ( isAlways ) item.toggleTitle = CONFIG.DND4E.spellPreparationModes.always;
+			// else if ( isPrepared ) item.toggleTitle = CONFIG.DND4E.spellPreparationModes.prepared;
+			if ( isPrepared ) item.toggleTitle = localize("PowerPrepared");
+			else item.toggleTitle = localize("PowerUnPrepared");
+		}
+		else {
+			const isActive = foundry.utils.getProperty(item.system, "equipped");
+			item.toggleClass = isActive ? "active" : "";
+			item.toggleTitle = localize(isActive ? "Equipped" : "Unequipped");
+		}
 	}
-	else {
-	  const isActive = foundry.utils.getProperty(item.system, "equipped");
-	  item.toggleClass = isActive ? "active" : "";
-	  item.toggleTitle = game.i18n.localize(isActive ? "DND4E.Equipped" : "DND4E.Unequipped");
-	}
-  }
+
 	_prepareDataSense(data, map) {
-		
 		for ( let [l, choices] of Object.entries(map) ) {
 			const trait = data[l];
 			if ( !trait ) continue;
@@ -643,7 +654,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 				values = trait.value instanceof Array ? trait.value : [trait.value];
 			}
 			trait.selected = values.reduce((obj, l) => {
-				obj[l] = l[1] != "" ? `${choices[l[0]]} ${l[1]} sq` : choices[l[0]];
+			obj[l] = l[1] != "" ? `${choices[l[0]]} ${l[1]} sq` : choices[l[0]];
 				return obj;
 			}, {});
 			// Add custom entry
@@ -651,11 +662,11 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 				trait.custom.split(";").forEach((c, i) => trait.selected[`custom${i+1}`] = c.trim());
 			}
 			trait.cssClass = !foundry.utils.isEmpty(trait.selected) ? "" : "inactive";
-			
+
 		}
 	}
 	_prepareDataSave(data, map) {
-		
+
 		for ( let [l, choices] of Object.entries(map) ) {
 			const trait = data[l];
 			if ( !trait ) continue;
@@ -664,7 +675,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 				values = trait.value instanceof Array ? trait.value : [trait.value];
 			}
 			trait.selected = values.reduce((obj, l) => {
-				obj[l] = l[1] > 0 ? `${choices[l[0]]} +${l[1]}` : l[1] != "" ? `${choices[l[0]]} ${l[1]}` : choices[l[0]];
+			obj[l] = l[1] > 0 ? `${choices[l[0]]} +${l[1]}` : l[1] != "" ? `${choices[l[0]]} ${l[1]}` : choices[l[0]];
 				// obj[l] = l[1] != "" ? `${choices[l[0]]} ${l[1]}` : choices[l[0]];
 				return obj;
 			}, {});
@@ -673,42 +684,42 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 				trait.custom.split(";").forEach((c, i) => trait.selected[`custom${i+1}`] = c.trim());
 			}
 			trait.cssClass = !foundry.utils.isEmpty(trait.selected) ? "" : "inactive";
-			
+
 		}
 	}
-	
-  /* -------------------------------------------- */
 
-  /**
-   * Determine whether an Owned Item will be shown based on the current set of filters
-   * @return {boolean}
-   * @private
-   */
-  _filterItems(items, filters) {
-	return items.filter(item => {
-	  const system = item.system;
+	/* -------------------------------------------- */
 
-	  // Action usage
-	  for ( let f of ["action", "bonus", "reaction"] ) {
-		if ( filters.has(f) ) {
-		  if ((system.activation && (system.activation.type !== f))) return false;
-		}
-	  }
+	/**
+	* Determine whether an Owned Item will be shown based on the current set of filters
+	* @return {boolean}
+	* @private
+	*/
+	_filterItems(items, filters) {
+		return items.filter(item => {
+			const system = item.system;
 
-	  // Equipment-specific filters
-	  if ( filters.has("equipped") ) {
-		if ( system.equipped !== true ) return false;
-	  }
-	  return true;
-	});
-  }	
+			// Action usage
+			for ( let f of ["action", "bonus", "reaction"] ) {
+				if ( filters.has(f) ) {
+					if ((system.activation && (system.activation.type !== f))) return false;
+				}
+			}
+
+			// Equipment-specific filters
+			if ( filters.has("equipped") ) {
+				if ( system.equipped !== true ) return false;
+			}
+			return true;
+		});
+	}	
 
 	_getTrainingIcon(level) {
 		const icons = {
 			0: '<i class="far fa-circle"></i>',
 			5: '<i class="fas fa-check"></i>',
 			8: '<i class="fas fa-check-double"></i>'
-			};
+		};
 		return icons[level];
 	}
 
@@ -747,16 +758,16 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 			html.find('.skill-name').click(this._onRollSkillCheck.bind(this));
 
 			html.find('.passive-message').click(this._onRollPassiveCheck.bind(this));
-			
+
 			//Roll Abillity Checks
 			html.find('.ability-name').click(this._onRollAbilityCheck.bind(this));
-			
+
 			//Roll Defence Checks
 			html.find('.def-name').click(this._onRollDefenceCheck.bind(this));
-			
+
 			//Open HP-Options
 			html.find('.health-option').click(this._onHPOptions.bind(this));
-			
+
 			//Open Skill-Bonus
 			html.find('.skill-bonus').click(this._onSkillBonus.bind(this));
 			html.find('.death-save-bonus').click(this._onDeathSaveBonus.bind(this));
@@ -770,11 +781,11 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 			html.find('.passive-bonus').click(this._onPassiveBonus.bind(this));
 			html.find('.modifiers-bonus').click(this._onModifiersBonus.bind(this));
 			html.find('.resistances-bonus').click(this._onResistancesBonus.bind(this));
-			
+
 			html.find('.movement-dialog').click(this._onMovementDialog.bind(this));		
-			
+
 			html.find('.custom-roll-descriptions').click(this._onCustomRolldDescriptions.bind(this));
-			
+
 			//second wind
 			html.find('.second-wind').click(this._onSecondWind.bind(this));
 
@@ -784,29 +795,29 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 			//action point
 			html.find('.action-point').click(this._onActionPointDialog.bind(this));
 			html.find('.action-point-extra').click(this._onActionPointExtraDialog.bind(this));
-			
+
 			//short rest
 			html.find('.short-rest').click(this._onShortRest.bind(this));
-			
+
 			//long rest
 			html.find('.long-rest').click(this._onLongRest.bind(this));		
-			
+
 			//death save
 			html.find('.death-save').click(this._onDeathSave.bind(this));
 			html.find('.roll-save').click(this._onSavingThrow.bind(this));
 
 			//roll init
 			html.find('.rollInitiative').click(this._onrollInitiative.bind(this));
-			
+
 			// Trait Selector
 			html.find('.trait-selector').click(this._onTraitSelector.bind(this));
 			html.find('.trait-selector-weapon').click(this._onTraitSelectorWeapon.bind(this));
 			html.find('.trait-selector-senses').click(this._onTraitSelectorSense.bind(this));
 			html.find('.list-string-input').click(this._onListStringInput.bind(this));
-			
+
 			//save throw bonus
 			html.find(`.trait-selector-save`).click(this._onTraitSelectorSaveThrow.bind(this));
-			
+
 			//Inventory & Item management
 			html.find('.item-create').click(this._onItemCreate.bind(this));
 			html.find('.item-edit').click(this._onItemEdit.bind(this));
@@ -820,13 +831,13 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 			// Active Effect management
 			// html.find(".effect-control").click(event => onManageActiveEffect(event, this.actor));
 			html.find(".effect-control").click(event => ActiveEffect4e.onManageActiveEffect(event, this.actor));
-				
+
 			// Item State Toggling
 			html.find('.item-toggle').click(this._onToggleItem.bind(this));
-		
+
 			//convert currency to it's largest form to save weight.
 			html.find(".currency-convert").click(this._onConvertCurrency.bind(this));
-			
+
 			// Item Rolling
 			html.find('.item .item-image').click(event => this._onItemRoll(event));
 			html.find('.item .item-image').hover(event => this._onItemHoverEntry(event), event => this._onItemHoverExit(event));
@@ -849,24 +860,24 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 			}
 		}
 	}
-	
+
 	/* -------------------------------------------- */
 	/**
 	 * Retrieve the list of fields that are currently modified by Active Effects on the Actor.
 	 * @returns {string[]}
 	 * @protected
-	 */
+	*/
 	_getActorOverrides() {
 		return Object.keys(foundry.utils.flattenObject(this.object.overrides || {}));
 	}
 
 
-		/* -------------------------------------------- */
+	/* -------------------------------------------- */
 	/**
 	 * Retrieve the list of fields that are directly modified by Active Effects, or indirectly modified via feat, item etc. bonuses.
 	 * @param excluded Array of candidate keys to exclude.
 	 * @returns {string[]}
-	 */
+	*/
 	_getAllActorOverrides(excluded = []) {
 		const overrides = new Set(this._getActorOverrides());
 		const actorKeys = new Set(Object.keys(foundry.utils.flattenObject(this.actor)));
@@ -903,7 +914,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	 * Handle input changes to numeric form fields, allowing them to accept delta-typed inputs
 	 * @param event
 	 * @private
-	 */
+	*/
 	_onChangeInputDelta(event) {
 		const input = event.target;
 		const value = input.value;
@@ -911,10 +922,10 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		if(/^[0-9]+$/.test(value)) {
 			return;
 		}
-		
+
 		if(!/^[\-=+ 0-9]+$/.test(value)) {
 			input.value = foundry.utils.getProperty(this.actor, input.name)
-			return;}
+		return;}
 
 		if ( ["+"].includes(value[0]) ) {
 			let delta = parseFloat(value.replace(/[^0-9]/g, ""));
@@ -925,24 +936,24 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 			input.value = foundry.utils.getProperty(this.actor, input.name) + delta || foundry.utils.getProperty(this.actor, input.name);
 		} else if ( value[0] === "=" ) {
 			input.value = value.replace(/[^\-0-9]/g, "");
-		} else{
+	} else{
 			input.value = foundry.utils.getProperty(this.actor, input.name)
 		}
 	}
 
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
-  /**
-   * Handle rolling of an item from the Actor sheet, obtaining the Item instance and dispatching to its roll method
-   * @private
-   */
+	/**
+	* Handle rolling of an item from the Actor sheet, obtaining the Item instance and dispatching to its roll method
+	* @private
+	*/
 	async _onItemSummary(event) {
 		event.preventDefault();
 		const li = $(event.currentTarget).parents(".item")
 		const itemId = li.data("item-id")
-	  	if (!itemId)
+		if (!itemId)
 		{
-			console.log("got an item summary event for something without an item id.  Assuming its an effect.")
+			console.log("got an item summary event for something without an item id. Assuming its an effect.")
 			return
 		}
 		const item = this.actor.items.get(itemId)
@@ -997,7 +1008,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		return div
 	}
 
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
 	_onDisplayActorArt(event) {
 		event.preventDefault();
@@ -1005,30 +1016,30 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		const p = new ImagePopout(this.object.img);
 		p.render(true);
 	}
-  
-  /* -------------------------------------------- */
 
-  /**
-   * Handle toggling the state of an Owned Item within the Actor
-   * @param {Event} event   The triggering click event
-   * @private
-   */
-  _onToggleItem(event) {
-	event.preventDefault();
-	const itemId = event.currentTarget.closest(".item").dataset.itemId;
-	const item = this.actor.items.get(itemId);
-	const power = ["power","atwill","encounter","daily","utility"];
-	const attr = power.includes(item.type) ? "system.prepared" : "system.equipped";
-	return item.update({[attr]: !foundry.utils.getProperty(item, attr)});
-  }
+	/* -------------------------------------------- */
 
-  /* -------------------------------------------- */
+	/**
+	* Handle toggling the state of an Owned Item within the Actor
+	* @param {Event} event	The triggering click event
+	* @private
+	*/
+	_onToggleItem(event) {
+		event.preventDefault();
+		const itemId = event.currentTarget.closest(".item").dataset.itemId;
+		const item = this.actor.items.get(itemId);
+		const power = ["power","atwill","encounter","daily","utility"];
+		const attr = power.includes(item.type) ? "system.prepared" : "system.equipped";
+		return item.update({[attr]: !foundry.utils.getProperty(item, attr)});
+	}
 
-  /**
-   * Handle creating a new Owned Item for the actor using initial data defined in the HTML dataset
-   * @param {Event} event   The originating click event
-   * @private
-   */
+	/* -------------------------------------------- */
+
+	/**
+	* Handle creating a new Owned Item for the actor using initial data defined in the HTML dataset
+	* @param {Event} event	The originating click event
+	* @private
+	*/
 	_onItemCreate(event) {
 		event.preventDefault();
 		const header = event.currentTarget;
@@ -1069,16 +1080,16 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 				itemData.system.uses = {
 					value: 1,
 					max: 1,
-					per: ["encounter", "charges", "round"].includes(type)  ? "enc" : "day"
+					per: ["encounter", "charges", "round"].includes(type) ? "enc" : "day"
 					// per: type === "encounter" ? "enc" : "day"
 				};
 			}
 		}
 
 		itemData.system.autoGenChatPowerCard = game.settings.get("dnd4e", "powerAutoGenerateLableOption");
-		
+
 		if(this.actor.type === "NPC"){
-			
+
 			itemData.system.weaponType = "none";
 			itemData.system.weaponUse = "none";
 
@@ -1086,7 +1097,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 				formula:"5 + @atkMod",
 				ability:"form"
 			};
-			itemData.system.hit  = {
+			itemData.system.hit = {
 				formula:"@powBase + @dmgMod",
 				critFormula:"@powMax",
 				baseDiceType: "d8",
@@ -1103,59 +1114,59 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 				}
 			}
 		}
-		
+
 		console.log(itemData)
 		return this.actor.createEmbeddedDocuments("Item", [itemData]);
 	}
 
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
-  /**
-   * Handle editing an existing Owned Item for the Actor
-   * @param {Event} event   The originating click event
-   * @private
-   */
-  _onItemEdit(event) {
-	event.preventDefault();
-	const li = event.currentTarget.closest(".item");
-	const item = this.actor.items.get(li.dataset.itemId);
-	item.sheet.render(true);
-  }
+	/**
+	* Handle editing an existing Owned Item for the Actor
+	* @param {Event} event	The originating click event
+	* @private
+	*/
+	_onItemEdit(event) {
+		event.preventDefault();
+		const li = event.currentTarget.closest(".item");
+		const item = this.actor.items.get(li.dataset.itemId);
+		item.sheet.render(true);
+	}
 
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
-  /**
-   * Handle deleting an existing Owned Item for the Actor
-   * @param {Event} event   The originating click event
-   * @private
-   */
-  _onItemDelete(event) {
-	event.preventDefault();
-	const li = event.currentTarget.closest(".item");
-	const item = this.actor.items.get(li.dataset.itemId);
-	if ( item )  {
-		if (game.settings.get("dnd4e", "itemDeleteConfirmation")) {
-			return Dialog.confirm({
-				title: game.i18n.format("DND4E.DeleteConfirmTitle", {name: item.name}),
-				content: game.i18n.format("DND4E.DeleteConfirmContent", {name: item.name}),
-				yes: () => { return item.delete() },
-				no: () => {},
-				defaultYes: true
-			});
-		}
-		else {
-			return item.delete();
+	/**
+	* Handle deleting an existing Owned Item for the Actor
+	* @param {Event} event	The originating click event
+	* @private
+	*/
+	_onItemDelete(event) {
+		event.preventDefault();
+		const li = event.currentTarget.closest(".item");
+		const item = this.actor.items.get(li.dataset.itemId);
+		if ( item ) {
+			if (game.settings.get("dnd4e", "itemDeleteConfirmation")) {
+				return Dialog.confirm({
+					title: game.i18n.format("DND4E.DeleteConfirmTitle", {name: item.name}),
+					content: game.i18n.format("DND4E.DeleteConfirmContent", {name: item.name}),
+					yes: () => { return item.delete() },
+					no: () => {},
+					defaultYes: true
+				});
+			}
+			else {
+				return item.delete();
+			}
 		}
 	}
-  }
-  
-  /* -------------------------------------------- */
 
-  /**
-   * Change the uses amount of an Owned Item within the Actor
-   * @param {Event} event   The triggering click event
-   * @private
-   */
+	/* -------------------------------------------- */
+
+	/**
+	* Change the uses amount of an Owned Item within the Actor
+	* @param {Event} event	The triggering click event
+	* @private
+	*/
 	async _onUsesChange(event) {
 		event.preventDefault();
 		const itemId = event.currentTarget.closest(".item").dataset.itemId;
@@ -1164,9 +1175,9 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		event.target.value = uses;
 		return item.update({ 'system.uses.value': uses });
 	}
-  
+
 	/* -------------------------------------------- */
-  
+
 	/**
 	*Opens dialog config window for HP options 
 	*turns on/off auto calculation of HP based on class stats
@@ -1177,12 +1188,12 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 
 		new HPOptions(this.actor).render(true)
 	}
-	
+
 	/* -------------------------------------------- */
 	/**
 	* Opens bonuses dialog config window for selected Skills
 	*/
-	
+
 	_onSkillBonus(event) {
 		event.preventDefault();
 		const skillName = event.currentTarget.parentElement.dataset.skill;
@@ -1197,13 +1208,13 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		const options = {target: `system.details.deathsavebon`, label: "Death Savingthrow Bonus" };
 		new AttributeBonusDialog(this.actor, options).render(true);		
 	}
-	
+
 	_onSurgeBonus(event) {
 		event.preventDefault();
 		const options = {target: `system.details.surgeBon`, label: "Healing Surge Bonus" };
 		new AttributeBonusDialog(this.actor, options).render(true);		
 	}
-	
+
 	_onSurgeEnv(event) {
 		event.preventDefault();
 		const options = {target: `system.details.surgeEnv`, label: "Healing Surges Environmental Losses" };
@@ -1215,21 +1226,21 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		const options = {target: `system.details.secondwindbon`, label: "Second Wind Bonus", secondWind: true };
 		new AttributeBonusDialog(this.actor, options).render(true);		
 	}
-	
+
 	_onDefencesBonus(event) {
 		event.preventDefault();
 		const defName = event.currentTarget.parentElement.dataset.defence;
 		const target = `system.defences.${defName}`;
-		const options = {target: target, label: `${this.actor.system.defences[defName].label} Defence Bonus`, ac: (defName ==="ac")  };
+		const options = {target: target, label: `${this.actor.system.defences[defName].label} Defence Bonus`, ac: (defName ==="ac")};
 		new AttributeBonusDialog(this.actor, options).render(true);		
 	}
-	
+
 	_onInitiativeBonus(event) {
 		event.preventDefault();
 		const options = {target: `system.attributes.init`, label: "Initiative Bonus", init: true };
 		new AttributeBonusDialog(this.actor, options).render(true);		
 	}
-	
+
 	_onMovementBonus(event) {
 		event.preventDefault();
 		const moveName = event.currentTarget.parentElement.dataset.movement;
@@ -1237,7 +1248,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		const options = {target: target, label: `${this.actor.system.movement[moveName].label} Movement Bonus` };
 		new AttributeBonusDialog(this.actor, options).render(true);		
 	}
-	
+
 	_onMovementDialog(event) {
 		event.preventDefault();
 		new MovementDialog(this.actor).render(true)
@@ -1277,7 +1288,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		const options = {target: target, label: `${this.actor.system.resistances[resName].label} Damage Resistances Bonus` };
 		new AttributeBonusDialog(this.actor, options).render(true);
 	}
-	
+
 	_onCustomRolldDescriptions(event) {
 		event.preventDefault();
 		const options = {data: this.actor};
@@ -1294,7 +1305,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		}
 		new SecondWindDialog(this.actor).render(true);		
 	}
-	
+
 	/* -------------------------------------------- */
 
 	_onActionPointDialog(event) {
@@ -1324,9 +1335,9 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		}
 		new ShortRestDialog(this.actor).render(true);
 	}
-	
+
 	/* -------------------------------------------- */
-  
+
 	/**
 	*Opens dialog window to long rest.
 	*reset HP, surges, encounter powers, daily powers, magic item use, actions points set to default.
@@ -1394,12 +1405,12 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	/**
 	 * Handle rolling of an item from the Actor sheet, obtaining the Item instance and dispatching to it's roll method
 	 * @private
-	 */
+	*/
 	_onItemRoll(event) {
 		event.preventDefault();
 		const itemId = event.currentTarget.closest(".item").dataset.itemId;
 		const item = this.actor.items.get(itemId);
-		
+
 		if ( item.type === "power") {
 			const fastForward = Helper.isRollFastForwarded(event);
 			return this.actor.usePower(item, {configureDialog: !fastForward, fastForward: fastForward});
@@ -1412,7 +1423,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		event.preventDefault();
 		const itemId = event.currentTarget.closest(".item").dataset.itemId;
 		const item = this.actor.items.get(itemId);
-		
+
 		if (item && item.type === "power" && item.hasAttack) {
 			const bonus = await item.getAttackBonus();
 
@@ -1462,14 +1473,14 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 				r.dice[0].options.fumble = r.dice[0].options.critical -1;
 				// r.evaluate({async: false});
 				await r.evaluate();
-	
+
 				let flav = `${item.name} did not recharge.`;
 				if(r.total >= r.dice[0].options.critical){
 					this.object.updateEmbeddedDocuments("Item", [{_id:itemId, "system.uses.value": item.system.preparedMaxUses}]);
 					flav = `${item.name} successfully recharged!`;
 				}
 
-				r.toMessage({
+			r.toMessage({
 					user: game.user.id,
 					speaker: {actor: this.object, alias: this.object.name},
 					flavor: flav,
@@ -1491,18 +1502,18 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		return;
 	}
 
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
 	/**
 	 * Handle mouse click events to convert currency to the highest possible denomination
-	 * @param {MouseEvent} event    The originating click event
+	 * @param {MouseEvent} event	The originating click event
 	 * @private
-	 */
+	*/
 	async _onConvertCurrency(event) {
 		event.preventDefault();
 		return Dialog.confirm({
-			title: `${game.i18n.localize("DND4E.CurrencyConvert")}`,
-			content: `<p>${game.i18n.localize("DND4E.CurrencyConvertHint")}</p>`,
+			title: `${localize("CurrencyConvert")}`,
+			content: `<p>${localize("CurrencyConvertHint")}</p>`,
 			yes: () => this.convertCurrency()
 		});
 	}
@@ -1511,39 +1522,39 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	/**
 	 * Returns the sum amount in GP that the character is currently holding
 	 * @private
-	 */
+	*/
 	_currencyGoldSumLabel(){
 		let goldSum = 0;
 		for(const [type,value] of Object.entries(this.actor.system.currency)){
 			goldSum += value * CONFIG.DND4E.currencyConversion[type]?.gp;
 		}
-		return game.i18n.localize("DND4E.GoldWealth") + (Math.round(goldSum*100)/100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+		return localize("DND4E.GoldWealth") + (Math.round(goldSum*100)/100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
 	}
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
-  /**
-   * Convert all carried currency to the highest possible denomination to reduce the number of raw coins being
-   * carried by an Actor.
-   * @return {Promise<Actor4e>}
-   */
-  convertCurrency() {
-	const curr = foundry.utils.duplicate(this.actor.system.currency);
-	const convert = CONFIG.DND4E.currencyConversion;
-	for ( let [c, t] of Object.entries(convert) ) {
-	  let change = Math.floor(curr[c] / t.each);
-	  curr[c] -= (change * t.each);
-	  curr[t.into] += change;
+	/**
+	* Convert all carried currency to the highest possible denomination to reduce the number of raw coins being
+	* carried by an Actor.
+	* @return {Promise<Actor4e>}
+	*/
+	convertCurrency() {
+		const curr = foundry.utils.duplicate(this.actor.system.currency);
+		const convert = CONFIG.DND4E.currencyConversion;
+		for ( let [c, t] of Object.entries(convert) ) {
+			let change = Math.floor(curr[c] / t.each);
+			curr[c] -= (change * t.each);
+			curr[t.into] += change;
+		}
+		return this.object.update({"system.currency": curr});
 	}
-	return this.object.update({"system.currency": curr});
-  }
-  
-  /* -------------------------------------------- */
 
-  /**
-   * Handle spawning the TraitSelector application which allows a checkbox of multiple trait options
-   * @param {Event} event   The click event which originated the selection
-   * @private
-   */
+	/* -------------------------------------------- */
+
+	/**
+	* Handle spawning the TraitSelector application which allows a checkbox of multiple trait options
+	* @param {Event} event	The click event which originated the selection
+	* @private
+	*/
 	_onTraitSelector(event) {
 		event.preventDefault();
 		const a = event.currentTarget;
@@ -1571,7 +1582,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		const options = { name: a.dataset.target, title: label.innerText, choices };
 		new TraitSelectorSense(this.actor, options).render(true);
 	}
-	
+
 	_onListStringInput(event) {
 		event.preventDefault();
 		const a = event.currentTarget;
@@ -1579,7 +1590,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		const options = { name: a.dataset.target, title: label.innerText};
 		new ListStringInput(this.actor, options).render(true);
 	}
-	
+
 	_onTraitSelectorSaveThrow(event) {
 		event.preventDefault();
 		const a = event.currentTarget;
@@ -1588,36 +1599,36 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 		new TraitSelectorSave(this.actor, options).render(true);
 	}
 
-  /* -------------------------------------------- */
+	/* -------------------------------------------- */
 
-  /** @override */
-  setPosition(options={}) {
-	const position = super.setPosition(options);
-	// const sheetBody = this.element.find(".sheet-body");
-	// const bodyHeight = position.height - 345;
-	// sheetBody.css("height", bodyHeight);
-	return position;
-  }
+	/** @override */
+	setPosition(options={}) {
+		const position = super.setPosition(options);
+		// const sheetBody = this.element.find(".sheet-body");
+		// const bodyHeight = position.height - 345;
+		// sheetBody.css("height", bodyHeight);
+		return position;
+	}
 
 	/* -------------------------------------------- */
 
 	/**
 	 * Handle rolling a Skill check
-	 * @param {Event} event   The originating click event
+	 * @param {Event} event, The originating click event
 	 * @private
-	 */
+	*/
 	_onRollSkillCheck(event) {
 		event.preventDefault();
 		const skill = event.currentTarget.parentElement.dataset.skill;
 		this.actor.rollSkill(skill, {event: event});
 	}
-  /* -------------------------------------------- */
-  
-  /**
-   * Handle posting a chat message for displaying passive skills.
-   * @param {Event} event   The originating click event
-   * @private
-   */
+	/* -------------------------------------------- */
+
+	/**
+	* Handle posting a chat message for displaying passive skills.
+	* @param {Event} event, The originating click event
+	* @private
+	*/
 	_onRollPassiveCheck(event) {
 		event.preventDefault();
 		const passName = event.currentTarget.parentElement.dataset.passive;
@@ -1636,9 +1647,9 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	/**
 	 * Handle activation of a context menu for an embedded Item or ActiveEffect document.
 	 * Dynamically populate the array of context menu options.
-	 * @param {HTMLElement} element       The HTML element for which the context menu is activated
+	 * @param {HTMLElement} element		  The HTML element for which the context menu is activated
 	 * @protected
-	 */
+	*/
 	_onItemContext(element) {
 
 		// Active Effects
@@ -1662,10 +1673,10 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 
 	/**
 	 * Prepare an array of context menu options which are available for owned ActiveEffect documents.
-	 * @param {ActiveEffect4e} effect         The ActiveEffect for which the context menu is activated
-	 * @returns {ContextMenuEntry[]}          An array of context menu options offered for the ActiveEffect
+	 * @param {ActiveEffect4e} effect		  The ActiveEffect for which the context menu is activated
+	 * @returns {ContextMenuEntry[]}		  An array of context menu options offered for the ActiveEffect
 	 * @protected
-	 */	
+	*/	
 
 	/* -------------------------------------------- */
 	_getActiveEffectContextOptions(effect) {
@@ -1695,34 +1706,34 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 
 	/**
 	 * Prepare an array of context menu options which are available for owned Item documents.
-	 * @param {Item4e} item                   The Item for which the context menu is activated
-	 * @returns {ContextMenuEntry[]}          An array of context menu options offered for the Item
+	 * @param {Item4e} item					  The Item for which the context menu is activated
+	 * @returns {ContextMenuEntry[]}		  An array of context menu options offered for the Item
 	 * @protected
-	 */
+	*/
 	_getItemContextOptions(item) {
 		// Standard Options
 		const options = [
-		{
-			name: "DND4E.ContextMenuActionToChat",
-			icon: "<i class='fas fa-share-from-square fa-fw'></i>",
-			callback: () => item.toChat()
-		},
-		{
-			name: "DND4E.ContextMenuActionEdit",
-			icon: "<i class='fas fa-edit fa-fw'></i>",
-			callback: () => item.sheet.render(true)
-		},
-		{
-			name: "DND4E.ContextMenuActionDuplicate",
-			icon: "<i class='fas fa-copy fa-fw'></i>",
-			condition: () => !["race", "background", "class", "subclass"].includes(item.type),
-			callback: () => item.clone({name: game.i18n.format("DOCUMENT.CopyOf", {name: item.name})}, {save: true})
-		},
-		{
-			name: "DND4E.ContextMenuActionDelete",
-			icon: "<i class='fas fa-trash fa-fw'></i>",
-			callback: () => item.deleteDialog()
-		}
+			{
+				name: "DND4E.ContextMenuActionToChat",
+				icon: "<i class='fas fa-share-from-square fa-fw'></i>",
+				callback: () => item.toChat()
+			},
+			{
+				name: "DND4E.ContextMenuActionEdit",
+				icon: "<i class='fas fa-edit fa-fw'></i>",
+				callback: () => item.sheet.render(true)
+			},
+			{
+				name: "DND4E.ContextMenuActionDuplicate",
+				icon: "<i class='fas fa-copy fa-fw'></i>",
+				condition: () => !["race", "background", "class", "subclass"].includes(item.type),
+				callback: () => item.clone({name: game.i18n.format("DOCUMENT.CopyOf", {name: item.name})}, {save: true})
+			},
+			{
+				name: "DND4E.ContextMenuActionDelete",
+				icon: "<i class='fas fa-trash fa-fw'></i>",
+				callback: () => item.deleteDialog()
+			}
 		];
 
 		// Toggle Attunement State
@@ -1760,7 +1771,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	 * Handle rolling a ability check
 	 * @param {Event} event   The originating click event
 	 * @private
-	 */
+	*/
 	_onRollAbilityCheck(event) {
 		event.preventDefault();
 		let ability = event.currentTarget.parentElement.dataset.ability;
@@ -1773,7 +1784,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	 * Handle rolling a defences check
 	 * @param {Event} event   The originating click event
 	 * @private
-	 */
+	*/
 	_onRollDefenceCheck(event) {
 		event.preventDefault();
 		const def = event.currentTarget.parentElement.dataset.defence;
@@ -1784,11 +1795,11 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 
 	/**
 	 * Handle dropping of an item reference or item data onto an Actor Sheet
-	 * @param {DragEvent} event            The concluding DragEvent which contains drop data
-	 * @param {object} data                The data transfer extracted from the event
+	 * @param {DragEvent} event			   The concluding DragEvent which contains drop data
+	 * @param {object} data				   The data transfer extracted from the event
 	 * @returns {Promise<Item[]|boolean>}  The created or updated Item instances, or false if the drop was not permitted.
 	 * @protected
-	 */
+	*/
 	async _onDropItem(event, data) {
 		if ( !this.actor.isOwner ) return false;
 		const item = await Item.implementation.fromDropData(data);
@@ -1806,7 +1817,7 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	/** @override */
 	async _onDropFolder(event, data) {
 		// return super._onDropFolder(event, data);
-		
+
 		if ( !this.actor.isOwner ) return [];
 		const folder = await Folder.implementation.fromDropData(data);
 		if ( folder.type !== "Item" ) return [];
@@ -1819,10 +1830,10 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 
 	/**
 	 * Handle the final creation of dropped Item data on the Actor.
-	 * @param {Item4e[]|Item4e} itemData     The item or items requested for creation
+	 * @param {Item4e[]|Item4e} itemData	 The item or items requested for creation
 	 * @returns {Promise<Item4e[]>}
 	 * @protected
-	 */
+	*/
 	async _onDropItemCreate(itemData) {
 		let items = itemData instanceof Array ? itemData : [itemData];
 		const itemsWithoutAdvancement = items.filter(i => !i.system.advancement?.length);
@@ -1831,11 +1842,11 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 			ui.notifications.warn(game.i18n.format("DND4E.WarnCantAddMultipleAdvancements"));
 			items = itemsWithoutAdvancement;
 		}
-	
+
 		// Filter out items already in containers to avoid creating duplicates
 		const containers = new Set(items.filter(i => i.type === "backpack").map(i => i._id));
 		items = items.filter(i => !containers.has(i.system.container));
-	
+
 		// Create the owned items & contents as normal
 		const toCreate = await Item4e.createWithContents(items, {
 			transformFirst: item => this._onDropSingleItem(item.toObject())
@@ -1849,9 +1860,9 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	 * Handles dropping of a single item onto this character sheet.
 	 * @param {object} itemData					The item data to create.
 	 * @returns {Promise<object|boolean>}		The item data to create after processing, or false if the item should not be
-	 * 											created or creation has been otherwise handled.
+	 *											created or creation has been otherwise handled.
 	 * @protected
-	 */
+	*/
 	async _onDropSingleItem(itemData) {
 		// Clean up data
 		this._onDropResetData(itemData);
@@ -1868,12 +1879,12 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 	/**
 	 * Reset certain pieces of data stored on items when they are dropped onto the actor.
 	 * @param {object} itemData    The item data requested for creation. **Will be mutated.**
-	 */
+	*/
 	_onDropResetData(itemData) {
 		if ( !itemData.system ) return;
 		// ["equipped", "proficient", "prepared"].forEach(k => delete itemData.system[k]);
 		// if ( "attunement" in itemData.system ) {
-		// 	itemData.system.attunement = Math.min(itemData.system.attunement, CONFIG.DND5E.attunementTypes.REQUIRED);
+		//	itemData.system.attunement = Math.min(itemData.system.attunement, CONFIG.DND5E.attunementTypes.REQUIRED);
 		// }
 	}
 
@@ -1881,9 +1892,9 @@ ${parseInt(data.system.movement.walk.value)} ${game.i18n.localize("DND4E.Movemen
 
 	/**
 	 * Stack identical consumables when a new one is dropped rather than creating a duplicate item.
-	 * @param {object} itemData         The item data requested for creation.
-	 * @returns {Promise<Item4e>|null}  If a duplicate was found, returns the adjusted item stack.
-	 */
+	 * @param {object} itemData			The item data requested for creation.
+	 * @returns {Promise<Item4e>|null}	If a duplicate was found, returns the adjusted item stack.
+	*/
 	_onDropStackConsumables(itemData) {
 
 		const droppedSourceId = itemData.flags.core?.sourceId;

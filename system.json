@@ -14,7 +14,7 @@
 			"url": "https://github.com/EndlesNights",
 			"email": "endlesnights@gmail.com",
 			"discord": "endlesnights#9000"
-		  }
+		}
 	],
 	"relationships.requires": [
 		{ "name": "lib-wrapper" }
@@ -59,7 +59,7 @@
 			"type": "JournalEntry",
 			"private": false,
 			"flags": {}
-		},		
+		},
 		{
 			"name": "example_character",
 			"label": "Example Character",
@@ -79,18 +79,18 @@
 	],
 	"packFolders": [
 		{
-		  "name": "DnD4e",
-		  "color": "#193974",
-		  "packs": [
+		"name": "DnD4e",
+		"color": "#193974",
+		"packs": [
 			"equipmentPack",
 			"featuresPack",
 			"example_powers",
 			"manual",
 			"example_character",
 			"srd_rules"
-		  ]
+		]
 		}
-	  ],
+	],
 	"languages": [
 		{
 			"lang": "en",
@@ -129,10 +129,10 @@
 		"units": "sq"
 	},
 	"documentTypes": {
-		"RegionBehavior" : {
-		  "difficultTerrain" :{}
+			"RegionBehavior" : {
+				"difficultTerrain" :{}
 		}
-	  },
+	},
 	"primaryTokenAttribute": "attributes.hp",
 	"secondaryTokenAttribute": "attributes.temphp",
 	"url": "https://github.com/EndlesNights/dnd4eBeta",
