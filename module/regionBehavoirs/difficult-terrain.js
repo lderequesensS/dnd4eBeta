@@ -1,40 +1,41 @@
-export class  RegionBehavior4e extends RegionBehavior {
+export class RegionBehavior4e extends RegionBehavior {}
 
-}
-
-export class DifficultTerrainRegionBehaviorType extends foundry.data.regionBehaviors.RegionBehaviorType {
-		
-	/** @override */
-	static defineSchema() {
-		return {
-			// events: this._createEventsField(),
-			terrainMultiplier: new foundry.data.fields.NumberField({
-				// async: true, gmOnly: true,
-				label: game.i18n.localize("DND4E.TerrainMultiplierLabel"),
-				hint: game.i18n.localize("DND4E.TerrainMultiplierHint")
-			}),
-			terrianTexture : new foundry.data.fields.FilePathField({
-				categories: ["IMAGE"],
-				label: game.i18n.localize("DND4E.TerrainMultiplierLabel"),
-				hint: game.i18n.localize("DND4E.TerrainMultiplierHint")
-			})
-		};
-	}
+export class DifficultTerrainRegionBehaviorType extends foundry.data
+  .regionBehaviors.RegionBehaviorType {
+  /** @override */
+  static defineSchema() {
+    return {
+      // events: this._createEventsField(),
+      terrainMultiplier: new foundry.data.fields.NumberField({
+        // async: true, gmOnly: true,
+        label: game.i18n.localize("DND4E.TerrainMultiplierLabel"),
+        hint: game.i18n.localize("DND4E.TerrainMultiplierHint"),
+      }),
+      terrianTexture: new foundry.data.fields.FilePathField({
+        categories: ["IMAGE"],
+        label: game.i18n.localize("DND4E.TerrainMultiplierLabel"),
+        hint: game.i18n.localize("DND4E.TerrainMultiplierHint"),
+      }),
+    };
+  }
 }
 
 export class Region4e extends Region {
-	static async _draw(wrapped, options){
-		wrapped(options);
-		this.hasDifficultTerrainBehavoir = this.document.behaviors.some(behavior => behavior.type === "difficultTerrain");
-		this.drawTerrianTint = CONFIG.DND4E.difficultTerrain.drawTerrianTint; // set from the Terrian Sheet
-		this.terrianTextureSRC = this.document.behaviors.find(behavior => behavior.system.terrianTexture)?.system.terrianTexture;		
-	}
+  static async _draw(wrapped, options) {
+    wrapped(options);
+    this.hasDifficultTerrainBehavoir = this.document.behaviors.some(
+      (behavior) => behavior.type === "difficultTerrain",
+    );
+    this.drawTerrianTint = CONFIG.DND4E.difficultTerrain.drawTerrianTint; // set from the Terrian Sheet
+    this.terrianTextureSRC = this.document.behaviors.find(
+      (behavior) => behavior.system.terrianTexture,
+    )?.system.terrianTexture;
+  }
 }
 
 export class DifficultTerrainShader4e extends HighlightRegionShader {
-
-	/** @override */
-	static vertexShader = `
+  /** @override */
+  static vertexShader = `
 		precision ${PIXI.settings.PRECISION_VERTEX} float;
 
 		attribute vec2 aVertexPosition;
@@ -63,8 +64,8 @@ export class DifficultTerrainShader4e extends HighlightRegionShader {
 		}
 	`;
 
-	/** @override */
-	static fragmentShader = `
+  /** @override */
+  static fragmentShader = `
 		precision ${PIXI.settings.PRECISION_FRAGMENT} float;
 
 		varying float vHatchOffset;
@@ -115,42 +116,43 @@ export class DifficultTerrainShader4e extends HighlightRegionShader {
 		}
 	`;
 
-	/* ---------------------------------------- */
+  /* ---------------------------------------- */
 
-	/** @override */
-	static defaultUniforms = {
-		...super.defaultUniforms,
-		canvasDimensions: [1, 1],
-		canvasX: 1.0,
-		canvasY: 1.0,
-		alphaOffset: 1.0,
-		drawTerrianTint: true,
-		hasDifficultTerrainBehavoir: false,
-		sceneDimensions: [0, 0, 1, 1],
-		screenDimensions: [1, 1],
-		tintAlpha: [1, 1, 1, 1],
-		uTexture: PIXI.Texture.WHITE,
-	};
+  /** @override */
+  static defaultUniforms = {
+    ...super.defaultUniforms,
+    canvasDimensions: [1, 1],
+    canvasX: 1.0,
+    canvasY: 1.0,
+    alphaOffset: 1.0,
+    drawTerrianTint: true,
+    hasDifficultTerrainBehavoir: false,
+    sceneDimensions: [0, 0, 1, 1],
+    screenDimensions: [1, 1],
+    tintAlpha: [1, 1, 1, 1],
+    uTexture: PIXI.Texture.WHITE,
+  };
 
+  /** @override */
+  _preRender(mesh, renderer) {
+    super._preRender(mesh, renderer);
+    const uniforms = this.uniforms;
+    uniforms.tintAlpha = mesh._cachedTint;
+    const dimensions = canvas.dimensions;
+    uniforms.canvasDimensions[0] = dimensions.width;
+    uniforms.canvasDimensions[1] = dimensions.height;
 
-	/** @override */
-	_preRender(mesh, renderer) {
-		super._preRender(mesh, renderer);
-		const uniforms = this.uniforms;
-		uniforms.tintAlpha = mesh._cachedTint;
-		const dimensions = canvas.dimensions;
-		uniforms.canvasDimensions[0] = dimensions.width;
-		uniforms.canvasDimensions[1] = dimensions.height;
-		
-		uniforms.canvasX = canvas.dimensions.width,
-		uniforms.canvasY = canvas.dimensions.height,
-		uniforms.canvasGrid = canvas.grid.size,
-		uniforms.drawTerrianTint = mesh.region.drawTerrianTint,
-		uniforms.hasDifficultTerrainBehavoir = mesh.region.hasDifficultTerrainBehavoir,
-
-		uniforms.sceneDimensions = dimensions.sceneRect;
-		uniforms.screenDimensions = canvas.screenDimensions;
-		uniforms.uTexture = PIXI.Texture.from(mesh.region.terrianTextureSRC || CONFIG.DND4E.difficultTerrain.img);
-		uniforms.alphaOffset = CONFIG.DND4E.difficultTerrain.alpha;
-	}
+    (uniforms.canvasX = canvas.dimensions.width),
+      (uniforms.canvasY = canvas.dimensions.height),
+      (uniforms.canvasGrid = canvas.grid.size),
+      (uniforms.drawTerrianTint = mesh.region.drawTerrianTint),
+      (uniforms.hasDifficultTerrainBehavoir =
+        mesh.region.hasDifficultTerrainBehavoir),
+      (uniforms.sceneDimensions = dimensions.sceneRect);
+    uniforms.screenDimensions = canvas.screenDimensions;
+    uniforms.uTexture = PIXI.Texture.from(
+      mesh.region.terrianTextureSRC || CONFIG.DND4E.difficultTerrain.img,
+    );
+    uniforms.alphaOffset = CONFIG.DND4E.difficultTerrain.alpha;
+  }
 }

@@ -1,13 +1,26 @@
 export default class ItemGranter extends foundry.abstract.DataModel {
-
   /* -------------------------------------------- */
 
   /**
    * The item types that are supported in Item Grant.
    * @type {Set<string>}
    */
-  static VALID_TYPES = new Set(["weapon", "equipment", "consumable", "tool", "loot", "classFeats", "feat", "backpack", "raceFeats", "pathFeats", "destinyFeats", "ritual", "power"]);
-  
+  static VALID_TYPES = new Set([
+    "weapon",
+    "equipment",
+    "consumable",
+    "tool",
+    "loot",
+    "classFeats",
+    "feat",
+    "backpack",
+    "raceFeats",
+    "pathFeats",
+    "destinyFeats",
+    "ritual",
+    "power",
+  ]);
+
   /* -------------------------------------------- */
 
   /**
@@ -19,10 +32,13 @@ export default class ItemGranter extends foundry.abstract.DataModel {
    * @throws An error if the item is invalid and strict is `true`.
    */
 
-  _validateItemType(item, { strict=true }={}) {
-    if ( this.constructor.VALID_TYPES.has(item.type) ) return true;
+  _validateItemType(item, { strict = true } = {}) {
+    if (this.constructor.VALID_TYPES.has(item.type)) return true;
     const type = game.i18n.localize(CONFIG.Item.typeLabels[item.type]);
-    if ( strict ) throw new Error(game.i18n.format("DND4E.AdvancementItemTypeInvalidWarning", {type}));
+    if (strict)
+      throw new Error(
+        game.i18n.format("DND4E.AdvancementItemTypeInvalidWarning", { type }),
+      );
     return false;
   }
 }

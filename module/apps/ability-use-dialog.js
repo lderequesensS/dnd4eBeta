@@ -3,7 +3,7 @@
  * @type {Dialog}
  */
 export default class AbilityUseDialog extends Dialog {
-  constructor(item, dialogData={}, options={}) {
+  constructor(item, dialogData = {}, options = {}) {
     super(dialogData, options);
     this.options.classes = ["dnd4e", "dialog"];
 
@@ -25,7 +25,10 @@ export default class AbilityUseDialog extends Dialog {
    * @return {Promise}
    */
   static async create(item) {
-    if ( !item.isOwned ) throw new Error("You cannot display an ability usage dialog for an unkowned item");
+    if (!item.isOwned)
+      throw new Error(
+        "You cannot display an ability usage dialog for an unkowned item",
+      );
 
     // Prepare data
     const actorData = item.actor.system;
@@ -41,13 +44,19 @@ export default class AbilityUseDialog extends Dialog {
       title: game.i18n.format("DND4E.AbilityUseHint", item),
       note: this._getAbilityUseNote(item, uses, recharge),
       hasLimitedUses: itemData.preparedMaxUses || recharges,
-      canUse: recharges ? recharge.charged : (quantity > 0 && !uses.value) || uses.value > 0,
-      hasPlaceableTemplate: game.user.can("TEMPLATE_CREATE") && item.hasAreaTarget,
-      errors: []
+      canUse: recharges
+        ? recharge.charged
+        : (quantity > 0 && !uses.value) || uses.value > 0,
+      hasPlaceableTemplate:
+        game.user.can("TEMPLATE_CREATE") && item.hasAreaTarget,
+      errors: [],
     };
 
     // Render the ability usage template
-    const html = await renderTemplate("systems/dnd4e/templates/apps/ability-use.html", system);
+    const html = await renderTemplate(
+      "systems/dnd4e/templates/apps/ability-use.html",
+      system,
+    );
 
     // Create the Dialog and return as a Promise
     const icon = "fa-fist-raised";
@@ -60,11 +69,12 @@ export default class AbilityUseDialog extends Dialog {
           use: {
             icon: `<i class="fas ${icon}"></i>`,
             label: label,
-            callback: html => resolve(new FormData(html[0].querySelector("form")))
-          }
+            callback: (html) =>
+              resolve(new FormData(html[0].querySelector("form"))),
+          },
         },
         default: "use",
-        close: () => resolve(null)
+        close: () => resolve(null),
       });
       dlg.render(true);
     });
@@ -79,33 +89,40 @@ export default class AbilityUseDialog extends Dialog {
    * @private
    */
   static _getAbilityUseNote(item, uses, recharge) {
-
     // Zero quantity
     const quantity = item.system.quantity;
-    if ( quantity <= 0 ) return game.i18n.localize("DND4E.AbilityUseUnavailableHint");
+    if (quantity <= 0)
+      return game.i18n.localize("DND4E.AbilityUseUnavailableHint");
 
     // Abilities which use Recharge
-    if ( !!recharge.value ) {
-      return game.i18n.format(recharge.charged ? "DND4E.AbilityUseChargedHint" : "DND4E.AbilityUseRechargeHint", {
-        type: item.type,
-      })
+    if (!!recharge.value) {
+      return game.i18n.format(
+        recharge.charged
+          ? "DND4E.AbilityUseChargedHint"
+          : "DND4E.AbilityUseRechargeHint",
+        {
+          type: item.type,
+        },
+      );
     }
 
     // Does not use any resource
-    if ( !uses.per || !item.system.preparedMaxUses ) return "";
+    if (!uses.per || !item.system.preparedMaxUses) return "";
 
     // Consumables
-    if ( item.type === "consumable" ) {
+    if (item.type === "consumable") {
       let str = "DND4E.AbilityUseNormalHint";
-      if ( uses.value >= 1 ) str = "DND4E.AbilityUseConsumableChargeHint";
-      else if ( item.system.quantity === 1 && uses.autoDestroy ) str = "DND4E.AbilityUseConsumableDestroyHint";
-      else if ( item.system.quantity > 1 ) str = "DND4E.AbilityUseConsumableQuantityHint";
+      if (uses.value >= 1) str = "DND4E.AbilityUseConsumableChargeHint";
+      else if (item.system.quantity === 1 && uses.autoDestroy)
+        str = "DND4E.AbilityUseConsumableDestroyHint";
+      else if (item.system.quantity > 1)
+        str = "DND4E.AbilityUseConsumableQuantityHint";
       return game.i18n.format(str, {
         type: item.system.consumableType,
         value: uses.value,
         quantity: item.system.quantity,
         max: item.system.preparedMaxUses,
-        per: CONFIG.DND4E.limitedUsePeriods[uses.per]
+        per: CONFIG.DND4E.limitedUsePeriods[uses.per],
       });
     }
 
@@ -115,14 +132,12 @@ export default class AbilityUseDialog extends Dialog {
         type: item.type,
         value: uses.value,
         max: item.system.preparedMaxUses,
-        per: CONFIG.DND4E.limitedUsePeriods[uses.per]
+        per: CONFIG.DND4E.limitedUsePeriods[uses.per],
       });
     }
   }
 
   /* -------------------------------------------- */
 
-  static _handleSubmit(formData, item) {
-
-  }
+  static _handleSubmit(formData, item) {}
 }

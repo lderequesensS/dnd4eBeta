@@ -3,11 +3,10 @@
  * @extends {FormApplication}
  */
 export default class TraitSelector extends FormApplication {
-
   /** @override */
-	static get defaultOptions() {
-	  return foundry.utils.mergeObject(super.defaultOptions, {
-	    id: "trait-selector",
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "trait-selector",
       classes: ["dnd4e"],
       title: "Actor Trait Selection",
       template: "systems/dnd4e/templates/apps/trait-selector.html",
@@ -16,7 +15,7 @@ export default class TraitSelector extends FormApplication {
       choices: {},
       allowCustom: true,
       minimum: 0,
-      maximum: null
+      maximum: null,
     });
   }
 
@@ -27,57 +26,57 @@ export default class TraitSelector extends FormApplication {
    * @type {String}
    */
   get attribute() {
-	  return this.options.name;
+    return this.options.name;
   }
 
-	get title() {
-		const name = this.options.name.substring(this.options.name.lastIndexOf(".") + 1);
-		return `${this.object.name} - ${super.title} - ${name}`;
-	}
+  get title() {
+    const name = this.options.name.substring(
+      this.options.name.lastIndexOf(".") + 1,
+    );
+    return `${this.object.name} - ${super.title} - ${name}`;
+  }
   /* -------------------------------------------- */
 
   /** @override */
   getData() {
-
     // Get current values
     let attr = foundry.utils.getProperty(this.object, this.attribute) || {};
     attr.value = attr.value || [];
 
-	  // Populate choices
+    // Populate choices
     const choices = duplicate(this.options.choices);
 
-    if(this.options.datasetOptions == "weaponProf"){
-      for ( let [k, v] of Object.entries(choices) ) {
+    if (this.options.datasetOptions == "weaponProf") {
+      for (let [k, v] of Object.entries(choices)) {
         const children = CONFIG.DND4E[k] ? duplicate(CONFIG.DND4E[k]) : {};
-        for ( let [kc, vc] of Object.entries(children) ) {
+        for (let [kc, vc] of Object.entries(children)) {
           children[kc] = {
             label: vc,
-            chosen: attr ? attr.value.includes(kc) : false
-          }
+            chosen: attr ? attr.value.includes(kc) : false,
+          };
         }
 
         choices[k] = {
           label: game.i18n.localize(`DND4E.Weapon${v}`),
           chosen: attr ? attr.value.includes(k) : false,
-          children: children
-        }
+          children: children,
+        };
       }
     } else {
-      for ( let [k, v] of Object.entries(choices) ) {
+      for (let [k, v] of Object.entries(choices)) {
         choices[k] = {
           label: v,
-          chosen: attr ? attr.value.includes(k) : false
-        }
+          chosen: attr ? attr.value.includes(k) : false,
+        };
       }
     }
 
-
     // Return data
-	  return {
+    return {
       allowCustom: this.options.allowCustom,
-	    choices: choices,
-      custom: attr ? attr.custom : ""
-    }
+      choices: choices,
+      custom: attr ? attr.custom : "",
+    };
   }
 
   /* -------------------------------------------- */
@@ -87,21 +86,25 @@ export default class TraitSelector extends FormApplication {
     const updateData = {};
     // Obtain choices
     const chosen = [];
-    for ( let [k, v] of Object.entries(formData) ) {
-      if ( (k !== "custom") && v ) chosen.push(k);
+    for (let [k, v] of Object.entries(formData)) {
+      if (k !== "custom" && v) chosen.push(k);
     }
     updateData[`${this.attribute}.value`] = chosen;
 
     // Validate the number chosen
-    if ( this.options.minimum && (chosen.length < this.options.minimum) ) {
-      return ui.notifications.error(`You must choose at least ${this.options.minimum} options`);
+    if (this.options.minimum && chosen.length < this.options.minimum) {
+      return ui.notifications.error(
+        `You must choose at least ${this.options.minimum} options`,
+      );
     }
-    if ( this.options.maximum && (chosen.length > this.options.maximum) ) {
-      return ui.notifications.error(`You may choose no more than ${this.options.maximum} options`);
+    if (this.options.maximum && chosen.length > this.options.maximum) {
+      return ui.notifications.error(
+        `You may choose no more than ${this.options.maximum} options`,
+      );
     }
 
     // Include custom
-    if ( this.options.allowCustom ) {
+    if (this.options.allowCustom) {
       updateData[`${this.attribute}.custom`] = formData.custom;
     }
 
@@ -115,8 +118,8 @@ export default class TraitSelector extends FormApplication {
   activateListeners(html) {
     super.activateListeners(html);
 
-    for ( const checkbox of html[0].querySelectorAll("input[type='checkbox']") ) {
-      if ( checkbox.checked ) this._onToggleCategory(checkbox);
+    for (const checkbox of html[0].querySelectorAll("input[type='checkbox']")) {
+      if (checkbox.checked) this._onToggleCategory(checkbox);
     }
   }
 
@@ -126,7 +129,7 @@ export default class TraitSelector extends FormApplication {
   async _onChangeInput(event) {
     super._onChangeInput(event);
 
-    if ( event.target.tagName === "INPUT" ) this._onToggleCategory(event.target);
+    if (event.target.tagName === "INPUT") this._onToggleCategory(event.target);
   }
 
   /* -------------------------------------------- */
@@ -137,13 +140,12 @@ export default class TraitSelector extends FormApplication {
    * @param {HTMLElement} checkbox  Checkbox that was changed.
    * @private
    */
-   _onToggleCategory(checkbox) {
+  _onToggleCategory(checkbox) {
     const children = checkbox.closest("li")?.querySelector("ol");
-    if ( !children ) return;
+    if (!children) return;
 
-    for ( const child of children.querySelectorAll("input[type='checkbox']") ) {
+    for (const child of children.querySelectorAll("input[type='checkbox']")) {
       child.checked = child.disabled = checkbox.checked;
     }
   }
-
 }

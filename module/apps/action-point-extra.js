@@ -1,30 +1,31 @@
-import DocumentSheet4e from "./DocumentSheet4e.js"
+import DocumentSheet4e from "./DocumentSheet4e.js";
 
 export class ActionPointExtraDialog extends DocumentSheet4e {
+  static get defaultOptions() {
+    const options = super.defaultOptions;
+    return foundry.utils.mergeObject(options, {
+      id: "action-point-extra",
+      classes: ["action-point"],
+      template: "systems/dnd4e/templates/apps/action-point-extra.html",
+      width: 500,
+      closeOnSubmit: true,
+    });
+  }
 
-	static get defaultOptions() {
-		const options = super.defaultOptions;
-		return foundry.utils.mergeObject(options, {
-			id: "action-point-extra",
-			classes: ["action-point"],
-			template: "systems/dnd4e/templates/apps/action-point-extra.html",
-			width: 500,
-			closeOnSubmit: true
-		});
-	}
-	
-	get title() {
-		return `${this.object.name} - Action Point Riders`;
-	}
+  get title() {
+    return `${this.object.name} - Action Point Riders`;
+  }
 
-	/** @override */
-	getData() {
-		return {system: this.object.system}
-	}
+  /** @override */
+  getData() {
+    return { system: this.object.system };
+  }
 
-	async _updateObject(event, formData) {
-		const updateData = {};
-		for(let system in formData) { updateData[`${system}`] = formData[`${system}`];}
-		return this.object.update(updateData);
-	}
+  async _updateObject(event, formData) {
+    const updateData = {};
+    for (let system in formData) {
+      updateData[`${system}`] = formData[`${system}`];
+    }
+    return this.object.update(updateData);
+  }
 }
