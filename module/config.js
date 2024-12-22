@@ -961,9 +961,9 @@ DND4E.healingTypes = {
 /* -------------------------------------------- */
 
 DND4E.featureSortTypes = {
-  name: { lable: "DND4E.ItemName" },
-  level: { lable: "DND4E.Level" },
-  none: { lable: "DND4E.None" },
+  name: { label: "DND4E.ItemName" },
+  level: { label: "DND4E.Level" },
+  none: { label: "DND4E.None" },
 };
 preLocalize("featureSortTypes", { keys: ["label"] });
 

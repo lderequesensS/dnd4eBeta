@@ -313,7 +313,7 @@ export default class ActorSheet4e extends ActorSheet {
     for (let i of items) {
       i.system.quantity = i.system.quantity || 0;
       i.system.weight = i.system.weight || 0;
-      i.totalWeightLable = i.totalWeight.toNearest(0.01);
+      i.totalWeightLabel = i.totalWeight.toNearest(0.01);
       inventory[i.type].items.push(i);
     }
 
@@ -1169,7 +1169,7 @@ ${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${local
     event.preventDefault();
     const header = event.currentTarget;
     const type = header.dataset.type;
-	const typePreLocalized = preLocalizePower(type);
+    const typePreLocalized = preLocalizePower(type);
     const itemData = {
       name: format("PowerNew", localize(typePreLocalized)),
       type: "power",

@@ -4,7 +4,11 @@
 			<input type="hidden" name="flags.dnd4e.sheetDisplay.features.sortBy.value">
 			<label for="feature-sort">{{localize 'DND4EUI.SortBy'}}</label><br>
 			<select name="system.featureSortTypes">
-				{{selectOptions config.featureSortTypes selected=system.featureSortTypes labelAttr="label"}}
+				 {{#each config.featureSortTypes}}
+				  <option value="{{this.value}}" {{#if (eq this.value system.featureSortTypes)}}selected{{/if}}>
+					{{localize this.label}}
+				  </option>
+				{{/each}}
 			</select>
 		</div>
 
