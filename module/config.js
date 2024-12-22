@@ -1092,16 +1092,16 @@ DND4E.featureTypes = {
 };
 
 DND4E.powerDiceTypes = {
-  weapon: "Base Weapon Damage",
-  flat: "Flat Damage",
-  d4: "d4",
-  d6: "d6",
-  d8: "d8",
-  d10: "d10",
-  d12: "d12",
-  d20: "d20",
+  weapon: { label: "DND4E.PowerDiceWeapon" },
+  flat: { label: "DND4E.PowerDiceFlat" },
+  d4: { label: "d4" },
+  d6: { label: "d6" },
+  d8: { label: "d8" },
+  d10: { label: "d10" },
+  d12: { label: "d12" },
+  d20: { label: "d20" },
 };
-
+preLocalize("powerDiceTypes", { keys: ["label"] });
 /* -------------------------------------------- */
 /**
  * Character senses options

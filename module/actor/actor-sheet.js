@@ -550,9 +550,9 @@ ${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${local
 
     switch (itemData.system.rangeType) {
       case "range":
-        itemData.system.rangeText = `${localize("rangeRanged")} ${itemData.system.rangePower}`;
+        itemData.system.rangeText = `${localize("rangeRanged")} ${itemData.system.rangePower ?? 0}`;
         itemData.system.rangeTextShort = localize("rangeRangedShort");
-        itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
+        itemData.system.rangeTextBlock = `${itemData.system.rangePower ?? 0}`;
         break;
 
       case "closeBurst":
@@ -562,21 +562,27 @@ ${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${local
         break;
 
       case "rangeBurst":
-        itemData.system.rangeText = `${localize("rangeBurst")} ${area} ${localize("RangeWithin")} ${itemData.system.rangePower}`;
+        itemData.system.rangeText = `${localize("rangeBurst")} ${area} ${localize("RangeWithin")} ${itemData.system.rangePower ?? 0}`;
         itemData.system.rangeTextShort = localize("rangeBurstShort");
-        itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower}`;
+        itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower ?? 0}`;
         break;
 
       case "rangeBlast":
-        itemData.system.rangeText = `${localize("rangeBlast")} ${area} ${localize("RangeWithin")} ${itemData.system.rangePower}`;
+        itemData.system.rangeText = `${localize("rangeBlast")} ${area} ${localize("RangeWithin")} ${itemData.system.rangePower ?? 0}`;
         itemData.system.rangeTextShort = localize("rangeBlastShort");
-        itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower}`;
+        itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower ?? 0}`;
+        break;
+
+      case "closeBlast":
+        itemData.system.rangeText = `${localize("rangeCloseBlast")} ${area}`;
+        itemData.system.rangeTextShort = localize("rangeCloseBlastShort");
+        itemData.system.rangeTextBlock = `${area}`;
         break;
 
       case "wall":
         itemData.system.rangeText = `${localize("rangeWall")} ${area} ${localize("RangeWithin")} ${itemData.system.rangePower}`;
         itemData.system.rangeTextShort = localize("rangeWallShort");
-        itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower}`;
+        itemData.system.rangeTextBlock = `${area} - ${itemData.system.rangePower ?? 0}`;
         break;
 
       case "personal":
@@ -584,7 +590,7 @@ ${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${local
         itemData.system.rangeTextShort = localize("rangePersonalShort");
         break;
 
-      case "personal":
+      case "special":
         itemData.system.rangeText = localize("rangeSpecial");
         itemData.system.rangeTextShort = localize("rangeSpecialShort");
         break;
@@ -595,8 +601,8 @@ ${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${local
           itemData.system.rangeText = localize("rangeTouch");
           itemData.system.rangeTextBlock = "";
         } else {
-          itemData.system.rangeText = `${localize("rangeTouch")} ${itemData.system.rangePower}`;
-          itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
+          itemData.system.rangeText = `${localize("rangeTouch")} ${itemData.system.rangePower ?? 0}`;
+          itemData.system.rangeTextBlock = `${itemData.system.rangePower ?? 0}`;
         }
         break;
 
@@ -604,16 +610,16 @@ ${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${local
         if (itemData.system.rangePower == null) {
           itemData.system.rangeText = localize("rangeMelee");
         } else {
-          itemData.system.rangeText = `${localize("rangeMelee")} ${itemData.system.rangePower}`;
-          itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
+          itemData.system.rangeText = `${localize("rangeMelee")} ${itemData.system.rangePower ?? 0}`;
+          itemData.system.rangeTextBlock = `${itemData.system.rangePower ?? 0}`;
         }
         itemData.system.rangeTextShort = localize("rangeMeleeShort");
         break;
 
       case "reach":
-        itemData.system.rangeText = `${localize("rangeReach")} ${itemData.system.rangePower}`;
+        itemData.system.rangeText = `${localize("rangeReach")} ${itemData.system.rangePower ?? 0}`;
         itemData.system.rangeTextShort = localize("rangeReachShort");
-        itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
+        itemData.system.rangeTextBlock = `${itemData.system.rangePower ?? 0}`;
         break;
 
       case "weapon":
@@ -622,14 +628,14 @@ ${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${local
           if (weaponUse.system.isRanged) {
             itemData.system.rangeText = `${localize("WeaponRanged")} - ${weaponUse.name}`;
             itemData.system.rangeTextShort = localize("WeaponRangedShort");
-            itemData.system.rangeTextBlock = `${weaponUse.system.range.value}/${weaponUse.system.range.long}`;
+            itemData.system.rangeTextBlock = `${weaponUse.system.range.value}/${weaponUse.system.range.long}`; // Divide by 0, DO IT!
           } else {
             itemData.system.rangeText = `${localize("WeaponMelee")} - ${weaponUse.name}`;
             itemData.system.rangeTextShort = localize("WeaponMeleeShort");
             itemData.system.rangeTextBlock = "";
 
             if (itemData.system.rangePower != null) {
-              itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
+              itemData.system.rangeTextBlock = `${itemData.system.rangePower ?? 0}`;
             }
           }
         } catch {
@@ -638,7 +644,7 @@ ${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${local
           itemData.system.rangeTextBlock = "";
 
           if (itemData.system.rangePower != null) {
-            itemData.system.rangeTextBlock = `${itemData.system.rangePower}`;
+            itemData.system.rangeTextBlock = `${itemData.system.rangePower ?? 0}`;
           }
         }
         break;
