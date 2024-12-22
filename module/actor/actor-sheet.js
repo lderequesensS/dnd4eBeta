@@ -20,7 +20,7 @@ import HPOptions from "../apps/hp-options.js";
 import { Helper } from "../helper.js";
 import { ActionPointExtraDialog } from "../apps/action-point-extra.js";
 import Item4e from "../item/item-document.js";
-import { localize } from "../globals.js";
+import { localize, format, preLocalizePower } from "../globals.js";
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -1169,8 +1169,9 @@ ${parseInt(data.system.movement.walk.value)} ${localize("MovementUnit")} ${local
     event.preventDefault();
     const header = event.currentTarget;
     const type = header.dataset.type;
+	const typePreLocalized = preLocalizePower(type);
     const itemData = {
-      name: `${game.i18n.format("DND4E.ItemNew", { type: type.capitalize() })} Power`,
+      name: format("PowerNew", localize(typePreLocalized)),
       type: "power",
       system: foundry.utils.duplicate(header.dataset),
     };

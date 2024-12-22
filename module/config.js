@@ -988,13 +988,12 @@ DND4E.powerSubtype = {
 };
 
 DND4E.powerUseType = {
-  atwill: "DND4E.PowerAt",
-  encounter: "DND4E.PowerEnc",
+  atwill: "DND4E.PowerAtWill",
+  encounter: "DND4E.PowerEncounter",
   daily: "DND4E.PowerDaily",
   recharge: "DND4E.PowerRecharge",
   other: "DND4E.PowerOther",
   item: "DND4E.PowerItem",
-  // "utility": "DND4E.PowerUtil"
 };
 DND4E.powerSource = {
   arcane: "DND4E.Arcane",
@@ -1053,8 +1052,8 @@ DND4E.powerGroupings = {
     other: { label: "DND4E.Other" },
   },
   usage: {
-    atwill: { label: "DND4E.PowerAt" },
-    encounter: { label: "DND4E.PowerEnc" },
+    atwill: { label: "DND4E.PowerAtWill" },
+    encounter: { label: "DND4E.PowerEncounter" },
     daily: { label: "DND4E.PowerDaily" },
     item: { label: "DND4E.PowerItem" },
     recharge: { label: "DND4E.PowerRecharge" },
